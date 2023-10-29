@@ -8,10 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @Controller
@@ -35,7 +32,7 @@ public class LoginController {
         return "auth/frmLogin";
     }
     @PostMapping("/login-usuario")
-    public String loginSucces(HttpServletRequest request){
+    public String loginUsuario(HttpServletRequest request){
         UserDetails usuario = (UserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -44,4 +41,21 @@ public class LoginController {
         session.setAttribute("usuario", usuario.getUsername());
         return "auth/index";
     }
+    @PostMapping("/cambiarpassword")
+    public String cambiarPassword(@RequestParam String newPassword) {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario != null) {
+            usuarioService.updatePassword(usuario, newPassword);
+        }
+        return "redirect:/auth/login";
+    }
+
+    private Usuario obtenerUsuarioActual() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return usuarioService.findUserByUserName(userDetails.getUsername());
+    }
+
 }
